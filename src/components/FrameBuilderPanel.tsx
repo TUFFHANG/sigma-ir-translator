@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,10 +12,12 @@ import {
   Stack, 
   ArrowUp, 
   ArrowDown,
-  FrameCorners
+  FrameCorners,
+  Eye,
+  ArrowsDownUp
 } from '@phosphor-icons/react'
 import { translateToSigmaIR } from '@/lib/sigma-ir'
-import { buildFrame } from '@/lib/sigma-ir/frame-builder'
+import { buildFrame, previewFrameOrder } from '@/lib/sigma-ir/frame-builder'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -31,8 +33,14 @@ export function FrameBuilderPanel() {
   const [currentInput, setCurrentInput] = useState('')
   const [frameOutput, setFrameOutput] = useState('')
   const [copied, setCopied] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const blocksList = blocks || []
+
+  const previewData = useMemo(() => {
+    if (blocksList.length === 0) return []
+    return previewFrameOrder(blocksList.map(b => b.output))
+  }, [blocksList])
 
   const handleAddBlock = () => {
     if (!currentInput.trim()) {
@@ -226,7 +234,111 @@ export function FrameBuilderPanel() {
         </div>
 
         {blocksList.length > 0 && (
-          <div className="pt-2">
+          <div className="pt-2 space-y-3">
+            <Button 
+              onClick={() => setShowPreview(!showPreview)}
+              variant="outline"
+              className="w-full gap-2"
+            >
+              {showPreview ? (
+                <>
+                  <Eye weight="bold" />
+                  Hide Sort Preview
+                </>
+              ) : (
+                <>
+                  <ArrowsDownUp weight="bold" />
+                  Show Sort Preview
+                </>
+              )}
+            </Button>
+
+            <AnimatePresence>
+              {showPreview && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Card className="p-4 bg-muted/30 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ArrowsDownUp className="text-accent" weight="bold" />
+                      <h3 className="text-sm font-semibold">Frame Sort Preview</h3>
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground">
+                      Blocks will be sorted lexicographically. Duplicates will be removed.
+                    </p>
+
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                      {previewData.map((item) => (
+                        <div
+                          key={`${item.originalIndex}-${item.sortedIndex}`}
+                          className={`p-3 rounded border ${
+                            item.isDuplicate 
+                              ? 'bg-destructive/10 border-destructive/30' 
+                              : item.moved 
+                                ? 'bg-accent/10 border-accent/30' 
+                                : 'bg-card border-border/50'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2 mb-2">
+                            <div className="flex items-center gap-2 text-xs">
+                              <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                                #{item.originalIndex + 1}
+                              </Badge>
+                              {item.moved && !item.isDuplicate && (
+                                <>
+                                  <span className="text-muted-foreground">→</span>
+                                  <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+                                    #{item.sortedIndex + 1}
+                                  </Badge>
+                                </>
+                              )}
+                            </div>
+                            
+                            {item.isDuplicate && (
+                              <Badge variant="destructive" className="text-[10px] h-5">
+                                DUPLICATE - WILL BE REMOVED
+                              </Badge>
+                            )}
+                            
+                            {item.moved && !item.isDuplicate && (
+                              <Badge variant="secondary" className="text-[10px] h-5">
+                                WILL MOVE
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <pre className={`text-[10px] font-mono overflow-x-auto ${
+                            item.isDuplicate ? 'opacity-50 line-through' : ''
+                          }`}>
+                            {item.block}
+                          </pre>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2 text-xs pt-2 border-t border-border/50">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded border border-accent/30 bg-accent/10" />
+                        <span className="text-muted-foreground">Will move</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded border border-destructive/30 bg-destructive/10" />
+                        <span className="text-muted-foreground">Duplicate (removed)</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded border border-border/50 bg-card" />
+                        <span className="text-muted-foreground">No change</span>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <Button 
               onClick={handleBuildFrame}
               className="w-full"

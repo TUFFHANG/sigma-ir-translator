@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildFrame } from '../frame-builder'
+import { buildFrame, previewFrameOrder } from '../frame-builder'
 
 describe('Frame Builder', () => {
   it('should build a valid frame from multiple blocks', () => {
@@ -125,5 +125,115 @@ describe('Frame Builder', () => {
     expect(lines[0]).toBe('=== Σ-FRAME ===')
     expect(lines[lines.length - 1]).toBe('=== /Σ-FRAME ===')
     expect(lines.length).toBe(4)
+  })
+})
+
+describe('Frame Order Preview', () => {
+  it('should return empty array for empty input', () => {
+    const preview = previewFrameOrder([])
+    expect(preview).toEqual([])
+  })
+
+  it('should detect blocks that will move', () => {
+    const blocks = [
+      '[[I3 O0|zebra|_]]',
+      '[[I1 O1|alpha|_]]',
+      '[[I2 O2|beta|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].originalIndex).toBe(1)
+    expect(preview[0].sortedIndex).toBe(0)
+    expect(preview[0].moved).toBe(true)
+    expect(preview[0].block).toBe('[[I1 O1|alpha|_]]')
+    
+    expect(preview[1].originalIndex).toBe(2)
+    expect(preview[1].sortedIndex).toBe(1)
+    expect(preview[1].moved).toBe(true)
+    
+    expect(preview[2].originalIndex).toBe(0)
+    expect(preview[2].sortedIndex).toBe(2)
+    expect(preview[2].moved).toBe(true)
+  })
+
+  it('should detect blocks that will not move', () => {
+    const blocks = [
+      '[[I1 O1|alpha|_]]',
+      '[[I2 O2|beta|_]]',
+      '[[I3 O0|zebra|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].moved).toBe(false)
+    expect(preview[1].moved).toBe(false)
+    expect(preview[2].moved).toBe(false)
+  })
+
+  it('should detect duplicate blocks', () => {
+    const blocks = [
+      '[[I1 O1|alpha|_]]',
+      '[[I1 O1|alpha|_]]',
+      '[[I2 O2|beta|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].isDuplicate).toBe(false)
+    expect(preview[1].isDuplicate).toBe(true)
+    expect(preview[2].isDuplicate).toBe(false)
+  })
+
+  it('should handle single block with no movement', () => {
+    const blocks = ['[[I1 O1|test|_]]']
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview.length).toBe(1)
+    expect(preview[0].moved).toBe(false)
+    expect(preview[0].isDuplicate).toBe(false)
+  })
+
+  it('should trim whitespace before processing', () => {
+    const blocks = [
+      '  [[I2 O2|beta|_]]  ',
+      '[[I1 O1|alpha|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].block).toBe('[[I1 O1|alpha|_]]')
+    expect(preview[1].block).toBe('[[I2 O2|beta|_]]')
+  })
+
+  it('should preserve original indices correctly', () => {
+    const blocks = [
+      '[[I3 O0|c|_]]',
+      '[[I1 O1|a|_]]',
+      '[[I2 O2|b|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].originalIndex).toBe(1)
+    expect(preview[1].originalIndex).toBe(2)
+    expect(preview[2].originalIndex).toBe(0)
+  })
+
+  it('should handle multiple duplicates correctly', () => {
+    const blocks = [
+      '[[I1 O1|alpha|_]]',
+      '[[I1 O1|alpha|_]]',
+      '[[I1 O1|alpha|_]]',
+      '[[I2 O2|beta|_]]'
+    ]
+    
+    const preview = previewFrameOrder(blocks)
+    
+    expect(preview[0].isDuplicate).toBe(false)
+    expect(preview[1].isDuplicate).toBe(true)
+    expect(preview[2].isDuplicate).toBe(true)
+    expect(preview[3].isDuplicate).toBe(false)
   })
 })

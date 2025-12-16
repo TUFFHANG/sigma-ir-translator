@@ -20,11 +20,11 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Success criteria**: Output is always valid Σ-NF or a canonical E* error block
 
 ### Σ-FRAME Builder
-- **Functionality**: Combine multiple Σ-IR blocks into a normalized frame structure
-- **Purpose**: Enable users to build complex multi-block compositions with proper Σ-FRAME-NF formatting
-- **Trigger**: User adds blocks one at a time, then clicks Build Σ-FRAME
-- **Progression**: Add blocks → Reorder as needed → Build frame → Blocks sorted lexicographically → Duplicates removed → Frame output display
-- **Success criteria**: Frame conforms to Σ-FRAME-NF specification with proper delimiters and block ordering
+- **Functionality**: Combine multiple Σ-IR blocks into a normalized frame structure with sort preview
+- **Purpose**: Enable users to build complex multi-block compositions with proper Σ-FRAME-NF formatting while understanding how blocks will be reordered
+- **Trigger**: User adds blocks one at a time, can preview sorting, then clicks Build Σ-FRAME
+- **Progression**: Add blocks → Preview sort order (optional) → See which blocks move and duplicates → Build frame → Blocks sorted lexicographically → Duplicates removed → Frame output display
+- **Success criteria**: Frame conforms to Σ-FRAME-NF specification with proper delimiters and block ordering; preview accurately shows final order before building
 
 ### Grammar Validation Engine
 - **Functionality**: Enforce SIGMA_IR_GRAMMAR.ebnf rules on all generated blocks
@@ -63,8 +63,9 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Unsupported request**: Emit E4 (unsupported) with reason
 - **Malformed input**: Attempt best-effort primitive extraction, emit error if insufficient
 - **Empty frame**: Require at least one block before building frame
-- **Duplicate blocks in frame**: Automatically deduplicate during frame normalization
-- **Block reordering**: Allow manual reordering before frame build, then apply lexicographic sort during normalization
+- **Duplicate blocks in frame**: Automatically deduplicate during frame normalization; preview shows which blocks are duplicates
+- **Block reordering preview**: Show visual indication of blocks that will move positions and which are duplicates before frame is built
+- **Lexicographic sorting**: Preview displays original vs. sorted positions with clear visual indicators
 
 ## Design Direction
 
