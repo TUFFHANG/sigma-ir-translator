@@ -20,11 +20,18 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Success criteria**: Output is always valid Σ-NF or a canonical E* error block
 
 ### Σ-FRAME Builder
-- **Functionality**: Combine multiple Σ-IR blocks into a normalized frame structure with sort preview
+- **Functionality**: Combine multiple Σ-IR blocks into a normalized frame structure with search, filtering, and sort preview
 - **Purpose**: Enable users to build complex multi-block compositions with proper Σ-FRAME-NF formatting while understanding how blocks will be reordered
-- **Trigger**: User adds blocks one at a time, can preview sorting, then clicks Build Σ-FRAME
-- **Progression**: Add blocks → Preview sort order (optional) → See which blocks move and duplicates → Build frame → Blocks sorted lexicographically → Duplicates removed → Frame output display
-- **Success criteria**: Frame conforms to Σ-FRAME-NF specification with proper delimiters and block ordering; preview accurately shows final order before building
+- **Trigger**: User adds blocks one at a time, searches/filters as needed, previews sorting, then clicks Build Σ-FRAME
+- **Progression**: Add blocks → Search/filter blocks → Preview sort order (optional) → See which blocks move and duplicates → Build frame → Blocks sorted lexicographically → Duplicates removed → Frame output display
+- **Success criteria**: Frame conforms to Σ-FRAME-NF specification with proper delimiters and block ordering; search and filtering work accurately; preview accurately shows final order before building
+
+### Block Search and Filtering
+- **Functionality**: Search blocks by input text or output content, filter by block type (success/error)
+- **Purpose**: Enable users to manage and navigate large collections of blocks efficiently
+- **Trigger**: User enters search query or toggles filter options
+- **Progression**: Enter search text → Results filter in real-time → Apply type filters → See filtered count → Clear filters to restore full view
+- **Success criteria**: Search matches both input and output text; filters combine correctly; clear visual feedback on active filters; easy reset
 
 ### Grammar Validation Engine
 - **Functionality**: Enforce SIGMA_IR_GRAMMAR.ebnf rules on all generated blocks
@@ -66,6 +73,9 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Duplicate blocks in frame**: Automatically deduplicate during frame normalization; preview shows which blocks are duplicates
 - **Block reordering preview**: Show visual indication of blocks that will move positions and which are duplicates before frame is built
 - **Lexicographic sorting**: Preview displays original vs. sorted positions with clear visual indicators
+- **Empty search results**: Display "no blocks match" message with clear filter reset option
+- **All blocks filtered out**: Show count of hidden blocks and provide easy filter clear action
+- **Search while filtered**: Combine search and type filters correctly, showing accurate counts
 
 ## Design Direction
 
@@ -123,5 +133,9 @@ Animations should reinforce validation states and transitions between input/outp
   - Check for successful validation
   - Warning for error blocks
   - X for clear operations
+  - MagnifyingGlass for search
+  - Funnel for filter controls
+  - Stack for frame building
+  - ArrowsDownUp for sort preview
 - **Spacing**: Use 4px base unit - sm=8px, md=16px, lg=24px, xl=32px for consistent rhythm
 - **Mobile**: Stack input/output vertically, full-width textarea, fixed translate button at bottom, collapsible grammar reference

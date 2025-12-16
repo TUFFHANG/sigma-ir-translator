@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { 
   Plus, 
   Trash, 
@@ -14,12 +15,23 @@ import {
   ArrowDown,
   FrameCorners,
   Eye,
-  ArrowsDownUp
+  ArrowsDownUp,
+  MagnifyingGlass,
+  Funnel,
+  X
 } from '@phosphor-icons/react'
 import { translateToSigmaIR } from '@/lib/sigma-ir'
 import { buildFrame, previewFrameOrder } from '@/lib/sigma-ir/frame-builder'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 
 interface Block {
   id: string
@@ -34,8 +46,35 @@ export function FrameBuilderPanel() {
   const [frameOutput, setFrameOutput] = useState('')
   const [copied, setCopied] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSuccessBlocks, setShowSuccessBlocks] = useState(true)
+  const [showErrorBlocks, setShowErrorBlocks] = useState(true)
 
   const blocksList = blocks || []
+
+  const filteredBlocks = useMemo(() => {
+    let filtered = blocksList
+
+    if (!showSuccessBlocks) {
+      filtered = filtered.filter(b => b.isError)
+    }
+    if (!showErrorBlocks) {
+      filtered = filtered.filter(b => !b.isError)
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(b => 
+        b.input.toLowerCase().includes(query) ||
+        b.output.toLowerCase().includes(query)
+      )
+    }
+
+    return filtered
+  }, [blocksList, searchQuery, showSuccessBlocks, showErrorBlocks])
+
+  const hasActiveFilters = !showSuccessBlocks || !showErrorBlocks || searchQuery.trim() !== ''
+  const filterCount = [!showSuccessBlocks, !showErrorBlocks, searchQuery.trim() !== ''].filter(Boolean).length
 
   const previewData = useMemo(() => {
     if (blocksList.length === 0) return []
@@ -123,7 +162,17 @@ export function FrameBuilderPanel() {
   const handleClear = () => {
     setBlocks([])
     setFrameOutput('')
+    setSearchQuery('')
+    setShowSuccessBlocks(true)
+    setShowErrorBlocks(true)
     toast.success('All blocks cleared')
+  }
+
+  const handleClearFilters = () => {
+    setSearchQuery('')
+    setShowSuccessBlocks(true)
+    setShowErrorBlocks(true)
+    toast.success('Filters cleared')
   }
 
   return (
@@ -170,66 +219,189 @@ export function FrameBuilderPanel() {
           Add Block
         </Button>
 
+        {blocksList.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <MagnifyingGlass 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
+                  size={16} 
+                />
+                <Input
+                  placeholder="Search blocks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-9"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                  >
+                    <X size={14} />
+                  </Button>
+                )}
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 relative">
+                    <Funnel weight={filterCount > 0 ? "fill" : "regular"} size={16} />
+                    {filterCount > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full"
+                      >
+                        {filterCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Filter by type</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={showSuccessBlocks}
+                    onCheckedChange={setShowSuccessBlocks}
+                  >
+                    Success blocks
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={showErrorBlocks}
+                    onCheckedChange={setShowErrorBlocks}
+                  >
+                    Error blocks
+                  </DropdownMenuCheckboxItem>
+                  {hasActiveFilters && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearFilters}
+                        className="w-full justify-start text-xs"
+                      >
+                        Clear filters
+                      </Button>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>
+                  Showing {filteredBlocks.length} of {blocksList.length} block{blocksList.length !== 1 ? 's' : ''}
+                </span>
+                {filteredBlocks.length === 0 && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={handleClearFilters}
+                    className="h-auto p-0 text-xs text-accent"
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
           <AnimatePresence mode="popLayout">
-            {blocksList.map((block, index) => (
+            {filteredBlocks.length === 0 && blocksList.length > 0 ? (
               <motion.div
-                key={block.id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="p-8 text-center border-2 border-dashed border-border rounded-lg"
               >
-                <Card className={`p-4 ${block.isError ? 'border-destructive/50' : 'border-accent/30'}`}>
-                  <div className="flex items-start gap-3">
-                    <div className="flex flex-col gap-1 pt-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleMoveUp(index)}
-                        disabled={index === 0}
-                        className="h-6 w-6 p-0"
-                      >
-                        <ArrowUp size={14} />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleMoveDown(index)}
-                        disabled={index === blocksList.length - 1}
-                        className="h-6 w-6 p-0"
-                      >
-                        <ArrowDown size={14} />
-                      </Button>
-                    </div>
-                    
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <Badge variant={block.isError ? 'destructive' : 'secondary'} className="text-xs">
-                          Block {index + 1}
-                        </Badge>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleRemoveBlock(block.id)}
-                          className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash size={14} />
-                        </Button>
-                      </div>
-                      
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {block.input}
-                      </p>
-                      
-                      <pre className="text-xs font-mono bg-muted/50 p-2 rounded overflow-x-auto">
-                        {block.output}
-                      </pre>
-                    </div>
-                  </div>
-                </Card>
+                <MagnifyingGlass size={32} className="mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-sm text-muted-foreground">No blocks match your filters</p>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="mt-2"
+                >
+                  Clear filters
+                </Button>
               </motion.div>
-            ))}
+            ) : (
+              filteredBlocks.map((block, visibleIndex) => {
+                const actualIndex = blocksList.findIndex(b => b.id === block.id)
+                return (
+                  <motion.div
+                    key={block.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    layout
+                  >
+                    <Card className={`p-4 ${block.isError ? 'border-destructive/50' : 'border-accent/30'}`}>
+                      <div className="flex items-start gap-3">
+                        <div className="flex flex-col gap-1 pt-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveUp(actualIndex)}
+                            disabled={actualIndex === 0}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowUp size={14} />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleMoveDown(actualIndex)}
+                            disabled={actualIndex === blocksList.length - 1}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowDown size={14} />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={block.isError ? 'destructive' : 'secondary'} className="text-xs">
+                                Block {actualIndex + 1}
+                              </Badge>
+                              {hasActiveFilters && (
+                                <Badge variant="outline" className="text-[10px]">
+                                  #{visibleIndex + 1} visible
+                                </Badge>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleRemoveBlock(block.id)}
+                              className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash size={14} />
+                            </Button>
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {block.input}
+                          </p>
+                          
+                          <pre className="text-xs font-mono bg-muted/50 p-2 rounded overflow-x-auto">
+                            {block.output}
+                          </pre>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                )
+              })
+            )}
           </AnimatePresence>
         </div>
 
