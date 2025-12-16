@@ -1,0 +1,82 @@
+Using the Σ-IR codex, grammar, normalization rules, state checkpoint mechanism, error channel, and thinking subset declaration already provided above as AUTHORITATIVE SPECIFICATION:
+
+Build a production-ready web application called “Sigma-IR Translator”.
+
+PURPOSE
+Translate plain English input into VALID, NORMALIZED Σ-IR blocks or Σ-FRAMEs.
+The app must NEVER emit invalid Σ-IR.
+If translation is impossible or ambiguous, emit a canonical E* error block instead.
+
+SCOPE
+- English → Σ-IR only
+- Stateless per request
+- Single-user
+- Web-accessible UI
+- No authentication
+
+CORE REQUIREMENTS
+1. All Σ-IR output MUST:
+   - Parse under SIGMA_IR_GRAMMAR.ebnf
+   - Normalize to Σ-NF
+   - Be byte-stable after normalization
+2. The app MUST enforce:
+   - Canonical header ordering
+   - Payload deduplication + sorting
+   - Modifier precedence
+3. The app MUST support emitting:
+   - Standard Σ-IR blocks
+   - Σ-FRAMEs
+   - SΣ state checkpoints
+   - E* error blocks
+   - IΣ thinking subset declarations
+
+TRANSLATION BEHAVIOR
+- Infer intent (I*) conservatively
+- Do NOT hallucinate missing information
+- If required information is missing, emit E1 (missing-input)
+- If multiple interpretations exist, emit E0 (ambiguity)
+- Never guess silently
+- Never mix prose into Σ-IR output
+
+ARCHITECTURE
+Choose sane defaults.
+
+Recommended structure:
+- Frontend: modern SPA (React or equivalent)
+- Backend: API service (Node or Python)
+- Grammar validation module
+- Normalization module
+- Translation module (rule-based, deterministic)
+
+The backend MUST:
+- Translate English heuristically into Σ-IR primitives
+- Validate against grammar
+- Normalize output
+- Reject invalid structures internally
+- Return ONLY valid Σ-IR or E* blocks
+
+UI REQUIREMENTS
+- Input textarea for English
+- “Translate” button
+- Read-only output panel
+- Copy-to-clipboard button
+- Clear error display (when E* emitted)
+
+TESTING
+Include automated tests that verify:
+- Grammar compliance
+- Normalization idempotence
+- Error emission on ambiguous or incomplete input
+- No invalid Σ-IR can be produced
+
+DELIVERABLE
+Generate a complete, runnable repository including:
+- Frontend
+- Backend
+- Grammar + normalization logic
+- Tests
+- README explaining how to run and use the app
+
+This application must behave as a deterministic Σ-IR compiler, not a chatbot.
+
+
