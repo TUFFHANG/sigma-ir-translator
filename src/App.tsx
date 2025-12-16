@@ -3,21 +3,40 @@ import { TranslatorPanel } from '@/components/TranslatorPanel'
 import { FrameBuilderPanel } from '@/components/FrameBuilderPanel'
 import { GrammarReference } from '@/components/GrammarReference'
 import { ExamplesPanel } from '@/components/ExamplesPanel'
+import { TemplatesPanel } from '@/components/TemplatesPanel'
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Code, Stack } from '@phosphor-icons/react'
+import { Code, Stack, Lightning } from '@phosphor-icons/react'
+import type { SigmaIRTemplate } from '@/lib/sigma-ir/templates'
 
 function App() {
   const [inputValue, setInputValue] = useState('')
+  const [activeTab, setActiveTab] = useState('translator')
 
   const handleSelectExample = (exampleInput: string) => {
     setInputValue(exampleInput)
-    const textarea = document.getElementById('english-input') as HTMLTextAreaElement
-    if (textarea) {
-      textarea.value = exampleInput
-      textarea.dispatchEvent(new Event('input', { bubbles: true }))
-      textarea.focus()
-    }
+    setActiveTab('translator')
+    setTimeout(() => {
+      const textarea = document.getElementById('english-input') as HTMLTextAreaElement
+      if (textarea) {
+        textarea.value = exampleInput
+        textarea.dispatchEvent(new Event('input', { bubbles: true }))
+        textarea.focus()
+      }
+    }, 100)
+  }
+
+  const handleApplyTemplate = (template: SigmaIRTemplate) => {
+    setInputValue(template.input)
+    setActiveTab('translator')
+    setTimeout(() => {
+      const textarea = document.getElementById('english-input') as HTMLTextAreaElement
+      if (textarea) {
+        textarea.value = template.input
+        textarea.dispatchEvent(new Event('input', { bubbles: true }))
+        textarea.focus()
+      }
+    }, 100)
   }
 
   return (
@@ -43,20 +62,28 @@ function App() {
 
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
-            <Tabs defaultValue="translator" className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
                 <TabsTrigger value="translator" className="gap-2">
                   <Code size={18} />
-                  Block Translator
+                  Translator
+                </TabsTrigger>
+                <TabsTrigger value="templates" className="gap-2">
+                  <Lightning size={18} />
+                  Templates
                 </TabsTrigger>
                 <TabsTrigger value="frame-builder" className="gap-2">
                   <Stack size={18} />
-                  Frame Builder
+                  Frames
                 </TabsTrigger>
               </TabsList>
               
               <TabsContent value="translator" className="mt-8">
                 <TranslatorPanel key={inputValue} />
+              </TabsContent>
+              
+              <TabsContent value="templates" className="mt-8">
+                <TemplatesPanel onApplyTemplate={handleApplyTemplate} />
               </TabsContent>
               
               <TabsContent value="frame-builder" className="mt-8">

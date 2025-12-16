@@ -33,6 +33,13 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Progression**: Enter search text → Results filter in real-time → Apply type filters → See filtered count → Clear filters to restore full view
 - **Success criteria**: Search matches both input and output text; filters combine correctly; clear visual feedback on active filters; easy reset
 
+### Block Templates
+- **Functionality**: Provide pre-built templates for common Σ-IR patterns organized by category with search functionality
+- **Purpose**: Accelerate block creation by offering validated examples for common use cases
+- **Trigger**: User navigates to Templates tab, browses categories, or searches templates
+- **Progression**: Browse templates by category → Search for specific patterns → View template details → Copy output or apply to translator → Use in own work
+- **Success criteria**: Templates cover all major pattern types; search works across all fields; templates can be copied or applied to translator seamlessly; all templates are valid Σ-NF
+
 ### Grammar Validation Engine
 - **Functionality**: Enforce SIGMA_IR_GRAMMAR.ebnf rules on all generated blocks
 - **Purpose**: Prevent invalid Σ-IR from ever being emitted
@@ -76,6 +83,9 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Empty search results**: Display "no blocks match" message with clear filter reset option
 - **All blocks filtered out**: Show count of hidden blocks and provide easy filter clear action
 - **Search while filtered**: Combine search and type filters correctly, showing accurate counts
+- **Template application**: When applying template to translator, switch to translator tab and populate input field
+- **No templates found**: Display clear "no results" message when search returns empty
+- **Template categories**: Organize templates into logical categories for easier browsing
 
 ## Design Direction
 
@@ -137,5 +147,7 @@ Animations should reinforce validation states and transitions between input/outp
   - Funnel for filter controls
   - Stack for frame building
   - ArrowsDownUp for sort preview
+  - Lightning for templates feature
+  - ArrowSquareOut for viewing/applying templates
 - **Spacing**: Use 4px base unit - sm=8px, md=16px, lg=24px, xl=32px for consistent rhythm
 - **Mobile**: Stack input/output vertically, full-width textarea, fixed translate button at bottom, collapsible grammar reference

@@ -20,6 +20,9 @@ A production-ready web application that translates plain English into valid, nor
 ✅ **Error Signaling** — Explicit E* error blocks for ambiguity or missing information  
 ✅ **Idempotent Output** — Normalized output is byte-stable  
 ✅ **Zero Hallucination** — Never guesses missing information  
+✅ **Block Templates** — 20+ pre-built templates for common Σ-IR patterns  
+✅ **Frame Builder** — Combine multiple blocks into normalized Σ-FRAMEs  
+✅ **Search & Filter** — Find and manage blocks efficiently  
 
 ## Architecture
 
@@ -30,11 +33,15 @@ src/
 │   ├── primitives.ts     # Primitive detection logic
 │   ├── validator.ts      # Grammar validation
 │   ├── normalizer.ts     # Σ-NF normalization
-│   └── translator.ts     # English → Σ-IR translation
+│   ├── translator.ts     # English → Σ-IR translation
+│   ├── frame-builder.ts  # Frame composition & normalization
+│   └── templates.ts      # Pre-built block templates
 ├── components/
-│   ├── TranslatorPanel.tsx    # Main translation UI
-│   ├── GrammarReference.tsx   # Collapsible reference
-│   └── ExamplesPanel.tsx      # Example inputs
+│   ├── TranslatorPanel.tsx       # Main translation UI
+│   ├── TemplatesPanel.tsx        # Template browser
+│   ├── FrameBuilderPanel.tsx     # Frame composition UI
+│   ├── GrammarReference.tsx      # Collapsible reference
+│   └── ExamplesPanel.tsx         # Example inputs
 └── App.tsx
 ```
 
@@ -100,12 +107,33 @@ The application is pre-configured and ready to run:
 # Just refresh the preview window to see changes
 ```
 
-### Translation Shortcuts
+### Main Features
 
+#### 1. Block Translator
 - Type English description in left panel
 - Click "Translate" or press `⌘/Ctrl + Enter`
 - Copy normalized Σ-IR output
 - Try example inputs to learn patterns
+
+#### 2. Templates Browser
+- Browse 20+ pre-built templates organized by category
+- Search templates by name, description, or use case
+- View detailed template information
+- Copy templates or apply them directly to the translator
+- Categories include:
+  - Design & Synthesis
+  - Execution & Implementation
+  - Analysis & Explanation
+  - State Management
+  - Error Handling
+  - Meta & Control
+
+#### 3. Frame Builder
+- Add multiple blocks to build complex Σ-FRAMEs
+- Search and filter blocks by type or content
+- Preview block ordering before building frame
+- Automatic deduplication and lexicographic sorting
+- Persistent block storage across sessions
 
 ## Validation Guarantees
 
