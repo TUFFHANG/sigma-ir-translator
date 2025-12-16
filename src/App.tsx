@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { TranslatorPanel } from '@/components/TranslatorPanel'
+import { FrameBuilderPanel } from '@/components/FrameBuilderPanel'
 import { GrammarReference } from '@/components/GrammarReference'
 import { ExamplesPanel } from '@/components/ExamplesPanel'
 import { Toaster } from '@/components/ui/sonner'
-import { Code } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Code, Stack } from '@phosphor-icons/react'
 
 function App() {
   const [inputValue, setInputValue] = useState('')
@@ -41,7 +43,26 @@ function App() {
 
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
-            <TranslatorPanel key={inputValue} />
+            <Tabs defaultValue="translator" className="w-full">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                <TabsTrigger value="translator" className="gap-2">
+                  <Code size={18} />
+                  Block Translator
+                </TabsTrigger>
+                <TabsTrigger value="frame-builder" className="gap-2">
+                  <Stack size={18} />
+                  Frame Builder
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="translator" className="mt-8">
+                <TranslatorPanel key={inputValue} />
+              </TabsContent>
+              
+              <TabsContent value="frame-builder" className="mt-8">
+                <FrameBuilderPanel />
+              </TabsContent>
+            </Tabs>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <GrammarReference />

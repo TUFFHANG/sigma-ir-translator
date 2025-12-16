@@ -19,6 +19,13 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Progression**: Text input → Parser analysis → Primitive extraction → Grammar validation → Normalization → Output display
 - **Success criteria**: Output is always valid Σ-NF or a canonical E* error block
 
+### Σ-FRAME Builder
+- **Functionality**: Combine multiple Σ-IR blocks into a normalized frame structure
+- **Purpose**: Enable users to build complex multi-block compositions with proper Σ-FRAME-NF formatting
+- **Trigger**: User adds blocks one at a time, then clicks Build Σ-FRAME
+- **Progression**: Add blocks → Reorder as needed → Build frame → Blocks sorted lexicographically → Duplicates removed → Frame output display
+- **Success criteria**: Frame conforms to Σ-FRAME-NF specification with proper delimiters and block ordering
+
 ### Grammar Validation Engine
 - **Functionality**: Enforce SIGMA_IR_GRAMMAR.ebnf rules on all generated blocks
 - **Purpose**: Prevent invalid Σ-IR from ever being emitted
@@ -55,6 +62,9 @@ This is a single-purpose translation tool with grammar validation, normalization
 - **Contradictory constraints**: Emit E2 (contradiction) identifying conflicts
 - **Unsupported request**: Emit E4 (unsupported) with reason
 - **Malformed input**: Attempt best-effort primitive extraction, emit error if insufficient
+- **Empty frame**: Require at least one block before building frame
+- **Duplicate blocks in frame**: Automatically deduplicate during frame normalization
+- **Block reordering**: Allow manual reordering before frame build, then apply lexicographic sort during normalization
 
 ## Design Direction
 
